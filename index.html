@@ -3,188 +3,512 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prêt de matériels IA – Réservations • build 2025-11-10-15h40</title>
+  <title>Prêt de matériels IA – Réservations • build 2025-11-10-16h00</title>
   <style>
     :root{
-      --bg:#eaf3ff;--panel:#ffffff;--muted:#4b5563;--text:#0f172a;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--err:#dc2626;--line:#dbe3f3;--chip:#eef2ff
+      --bg:#0f1419;
+      --bg-gradient:#0a0e13;
+      --panel:#1a1f2e;
+      --panel-hover:#232938;
+      --muted:#8b92a9;
+      --text:#e8eaed;
+      --accent:#4f9cf9;
+      --accent-hover:#6ba7ff;
+      --ok:#4ade80;
+      --warn:#fbbf24;
+      --err:#f87171;
+      --line:#2a3142;
+      --chip:#162033;
+      --chip-border:#2d4a7c;
+      --input-bg:#0d1117;
+      --slot-free:#162033;
+      --slot-free-hover:#1e2d47;
+      --slot-busy:#2d1b1b;
+      --slot-busy-border:#4a2626;
     }
+    
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#f7fbff);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    header{position:sticky;top:0;z-index:5;background:#ffffffcc;backdrop-filter:saturate(160%) blur(6px);border-bottom:1px solid var(--line)}
-    .wrap{max-width:1120px;margin:0 auto;padding:16px}
-    h1{font-size:22px;margin:2px 0}
-    .sub{color:var(--muted);font-size:13px}
-    .grid{display:grid;gap:16px}
-    .cols-2{grid-template-columns:2fr 1fr}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 26px #0b1b3a12}
-    .row{display:flex;gap:10px;align-items:center}
-    .row.wrap{flex-wrap:wrap}
-    .sp{display:flex;justify-content:space-between;align-items:center}
-    input,select,button,textarea{background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font:inherit}
-    input:focus,select:focus,textarea:focus{outline:2px solid #bfdbfe;border-color:#93c5fd}
-    button{cursor:pointer}
-    .btn{background:#f8fbff}
-    .btn:hover{filter:brightness(0.98)}
-    .btn-primary{background:linear-gradient(135deg,#60a5fa,#3b82f6);border:0;color:#fff}
+    
+    body{
+      margin:0;
+      background:linear-gradient(135deg,var(--bg),var(--bg-gradient));
+      color:var(--text);
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      min-height:100vh;
+    }
+    
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(26,31,46,0.85);
+      backdrop-filter:saturate(180%) blur(12px);
+      border-bottom:1px solid var(--line);
+      box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .wrap{
+      max-width:1280px;
+      margin:0 auto;
+      padding:20px;
+    }
+    
+    h1{
+      font-size:26px;
+      margin:4px 0;
+      font-weight:700;
+      background:linear-gradient(135deg,#fff,#8b92a9);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    
+    .sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:4px;
+    }
+    
+    .grid{
+      display:grid;
+      gap:20px;
+    }
+    
+    .cols-2{
+      grid-template-columns:2fr 1fr;
+    }
+    
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.4);
+      transition:transform 0.2s,box-shadow 0.2s;
+    }
+    
+    .panel:hover{
+      box-shadow:0 12px 48px rgba(0,0,0,0.5);
+    }
+    
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    
+    .row.wrap{
+      flex-wrap:wrap;
+    }
+    
+    .sp{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    
+    input,select,button,textarea{
+      background:var(--input-bg);
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius:12px;
+      padding:12px 16px;
+      font:inherit;
+      transition:all 0.2s;
+    }
+    
+    input:focus,select:focus,textarea:focus{
+      outline:2px solid var(--accent);
+      border-color:transparent;
+      background:rgba(79,156,249,0.05);
+    }
+    
+    button{
+      cursor:pointer;
+      font-weight:500;
+    }
+    
+    .btn{
+      background:var(--panel);
+      border:1px solid var(--line);
+      color:var(--text);
+      transition:all 0.2s;
+    }
+    
+    .btn:hover{
+      background:var(--panel-hover);
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+      border:0;
+      color:#fff;
+      font-weight:600;
+      box-shadow:0 4px 16px rgba(79,156,249,0.3);
+    }
+    
+    .btn-primary:hover{
+      box-shadow:0 6px 20px rgba(79,156,249,0.4);
+      transform:translateY(-2px);
+    }
+    
     .muted{color:var(--muted)}
-    .title{font-weight:700}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+    .title{font-weight:700;font-size:18px;margin-bottom:12px;}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
     .hidden{display:none}
-    .table{width:100%;border-collapse:separate;border-spacing:0}
-    .table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-    .table th{color:#0f172a;font-weight:600;background:#edf2ff}
-    .foot{color:#64748b;font-size:12px;margin-top:10px}
-    @media (max-width:980px){.cols-2{grid-template-columns:1fr}}
+    
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+    
+    .table th,.table td{
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+    }
+    
+    .table th{
+      color:var(--accent);
+      font-weight:600;
+      background:rgba(79,156,249,0.1);
+    }
+    
+    .foot{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:12px;
+    }
+    
+    @media (max-width:980px){
+      .cols-2{grid-template-columns:1fr}
+    }
 
-    /* Grille ressources */
-    .res-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-    @media (max-width:980px){.res-grid{grid-template-columns:repeat(2,1fr)}}
-    .card-res{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;transition:transform .08s,box-shadow .12s}
-    .card-res:hover{transform:translateY(-1px);box-shadow:0 8px 20px #0b1b3a12}
-    .card-res.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px #93c5fd55}
-    .card-res .name{font-weight:700}
-    .card-res .meta{font-size:12px;color:#64748b;margin-top:2px}
-    .chip{display:inline-block;padding:4px 8px;border-radius:999px;background:var(--chip);border:1px solid #c7d2fe;color:#3730a3;font-size:11px;margin-top:6px}
+    /* Grille ressources améliorée */
+    .res-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:14px;
+      margin-bottom:20px;
+    }
+    
+    .card-res{
+      border:2px solid var(--line);
+      border-radius:14px;
+      padding:16px;
+      background:linear-gradient(135deg,var(--input-bg),var(--panel));
+      cursor:pointer;
+      transition:all 0.3s;
+      position:relative;
+      overflow:hidden;
+    }
+    
+    .card-res::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:2px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      transform:translateX(-100%);
+      transition:transform 0.5s;
+    }
+    
+    .card-res:hover::before{
+      transform:translateX(100%);
+    }
+    
+    .card-res:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 30px rgba(79,156,249,0.2);
+      border-color:var(--accent);
+      background:linear-gradient(135deg,rgba(79,156,249,0.1),var(--panel));
+    }
+    
+    .card-res.active{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,rgba(79,156,249,0.2),var(--panel));
+      box-shadow:0 0 0 4px rgba(79,156,249,0.2),0 10px 30px rgba(79,156,249,0.3);
+    }
+    
+    .card-res .icon{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+    
+    .card-res .name{
+      font-weight:700;
+      font-size:16px;
+      margin-bottom:4px;
+    }
+    
+    .card-res .meta{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+    
+    .chip{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:999px;
+      background:var(--chip);
+      border:1px solid var(--chip-border);
+      color:var(--accent);
+      font-size:12px;
+      margin-top:8px;
+      font-weight:500;
+    }
 
-    /* Calendrier */
-    .calendar{display:grid;grid-template-columns:120px repeat(5,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .calendar .h{background:#edf2ff;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line)}
-    .slot{padding:10px;border-left:1px solid var(--line);border-bottom:1px solid var(--line);min-height:56px}
-    .slot.free{background:#ffffff}
-    .slot.busy{background:#fff7ed;border-left-color:#fde68a}
-    .slot .who{font-size:12px;color:#0f172a}
+    /* Calendrier amélioré */
+    .calendar{
+      display:grid;
+      grid-template-columns:140px repeat(5,1fr);
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:var(--input-bg);
+    }
+    
+    .calendar .h{
+      background:linear-gradient(135deg,rgba(79,156,249,0.1),rgba(79,156,249,0.05));
+      padding:12px;
+      font-weight:700;
+      border-bottom:1px solid var(--line);
+      color:var(--text);
+    }
+    
+    .slot{
+      padding:14px;
+      border-left:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      min-height:70px;
+      cursor:pointer;
+      transition:all 0.2s;
+      position:relative;
+    }
+    
+    .slot.free{
+      background:var(--slot-free);
+    }
+    
+    .slot.free:hover{
+      background:var(--slot-free-hover);
+      box-shadow:inset 0 0 20px rgba(79,156,249,0.1);
+    }
+    
+    .slot.busy{
+      background:var(--slot-busy);
+      border-left:2px solid var(--err);
+      cursor:not-allowed;
+    }
+    
+    .slot .who{
+      font-size:13px;
+      color:var(--text);
+      font-weight:500;
+    }
+    
+    .slot .libre-badge{
+      display:inline-block;
+      padding:4px 8px;
+      background:rgba(74,222,128,0.1);
+      color:var(--ok);
+      border-radius:6px;
+      font-size:12px;
+      font-weight:600;
+    }
+    
+    /* Animations */
+    @keyframes slideIn{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    
+    .panel{
+      animation:slideIn 0.5s ease-out;
+    }
+    
+    /* Dialog amélioré */
+    dialog{
+      border:1px solid var(--line);
+      background:var(--panel);
+      border-radius:16px;
+      padding:0;
+      width:min(560px,96vw);
+      color:var(--text);
+      box-shadow:0 20px 60px rgba(0,0,0,0.8);
+    }
+    
+    dialog::backdrop{
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px);
+    }
+
+    /* Google Sheets Link */
+    .sheets-link{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 16px;
+      background:linear-gradient(135deg,#34a853,#0f9d58);
+      color:white;
+      border-radius:8px;
+      text-decoration:none;
+      font-weight:500;
+      transition:all 0.2s;
+      font-size:14px;
+    }
+    
+    .sheets-link:hover{
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(52,168,83,0.4);
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="wrap sp">
       <div>
-        <h1>Prêt de matériels IA</h1>
-        <div class="sub">Créneaux demi-journée, lundi à vendredi. Attribution immédiate.</div>
+        <h1>🤖 Prêt de matériels IA</h1>
+        <div class="sub">Réservation de ressources IA • Créneaux demi-journée</div>
       </div>
       <div class="row">
-        <select id="siteFilter"></select>
-        <select id="typeFilter"><option value="">Tous les types</option></select>
-        <input id="q" placeholder="Rechercher une ressource" />
+        <select id="typeFilter">
+          <option value="">Tous les types</option>
+          <option value="Matériel">Matériel</option>
+          <option value="Abonnement">Abonnement</option>
+        </select>
+        <input id="q" placeholder="🔍 Rechercher..." />
+        <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit" target="_blank" class="sheets-link">
+          📊 Google Sheets
+        </a>
       </div>
     </div>
   </header>
 
-  <main class="wrap grid cols-2" style="margin-top:14px">
-    <section class="panel" style="padding:14px">
-      <div class="sp" style="margin-bottom:8px">
+  <main class="wrap grid cols-2" style="margin-top:24px">
+    <section class="panel" style="padding:20px">
+      <div class="sp" style="margin-bottom:16px">
         <div>
-          <div class="title">Ressources</div>
-          <div class="muted" style="font-size:12px">Clique une carte pour afficher son calendrier</div>
+          <div class="title">📅 Ressources disponibles</div>
+          <div class="muted" style="font-size:13px">Sélectionnez une ressource pour voir son planning</div>
         </div>
         <div class="row">
           <button class="btn" id="prevWeek">◀ Semaine -1</button>
           <button class="btn" id="nextWeek">Semaine +1 ▶</button>
         </div>
       </div>
-      <div id="resourceGrid" class="res-grid" style="margin-bottom:10px"></div>
-      <div class="title" style="margin:8px 0">Calendrier hebdo</div>
+      
+      <div id="resourceGrid" class="res-grid"></div>
+      
+      <div class="title" style="margin:20px 0 12px">📆 Planning hebdomadaire</div>
       <div id="calendar" class="calendar"></div>
-      <div class="foot">Créneaux: 09:30–12:30, 13:30–17:30, du lundi au vendredi. Fuseau: Europe/Paris.</div>
+      <div class="foot">⏰ Créneaux: 09h30–12h30 (matin), 13h30–17h30 (après-midi)</div>
     </section>
 
-    <section class="panel" style="padding:14px">
-      <div class="title" style="margin-bottom:8px">Nouvelle réservation</div>
-      <form id="frmRequest" class="grid" style="gap:8px">
+    <section class="panel" style="padding:20px">
+      <div class="title" style="margin-bottom:16px">✨ Nouvelle réservation</div>
+      <form id="frmRequest" class="grid" style="gap:12px">
         <div class="row">
           <input name="first_name" placeholder="Prénom" required />
           <input name="last_name" placeholder="Nom" required />
         </div>
-        <input name="service" placeholder="Service" required />
+        <input name="service" placeholder="Service / Direction" required />
         <input type="hidden" name="resource_id" />
         <div class="row">
           <input type="date" name="date" required />
           <select name="window" required>
-            <option value="AM">Matin (09:30–12:30)</option>
-            <option value="PM">Après-midi (13:30–17:30)</option>
+            <option value="AM">🌅 Matin (09h30–12h30)</option>
+            <option value="PM">☀️ Après-midi (13h30–17h30)</option>
           </select>
         </div>
-        <button class="btn-primary" type="submit">Réserver maintenant</button>
+        <button class="btn-primary" type="submit">🚀 Réserver ce créneau</button>
       </form>
-      <div class="foot">Règle: premier arrivé, premier servi. Un slot ne peut être réservé qu’une seule fois.</div>
-      <hr/>
-      <div class="title" style="margin:8px 0">Occupants actuels</div>
+      <div class="foot">ℹ️ Règle: premier arrivé, premier servi</div>
+      
+      <hr style="border:1px solid var(--line);margin:20px 0"/>
+      
+      <div class="title">👥 Occupations actuelles</div>
       <table class="table" id="tblNow"></table>
     </section>
 
-    <section class="panel" style="grid-column:1/-1;padding:14px">
-      <div class="sp" style="margin-bottom:8px">
-        <div class="title">Feedbacks récents</div>
+    <section class="panel" style="grid-column:1/-1;padding:20px">
+      <div class="sp" style="margin-bottom:16px">
+        <div class="title">💬 Feedbacks récents</div>
         <div class="row">
-          <button class="btn" id="btnExport">Exporter CSV</button>
-          <button class="btn" id="btnAdmin">Admin</button>
+          <button class="btn" id="btnExport">📥 Exporter CSV</button>
+          <button class="btn" id="btnAdmin">⚙️ Admin</button>
         </div>
       </div>
       <table class="table" id="tblFb"></table>
     </section>
 
-    <section class="panel hidden" id="adminPanel" style="grid-column:1/-1;padding:14px">
-      <div class="sp" style="margin-bottom:8px">
-        <div class="title">Administration</div>
+    <section class="panel hidden" id="adminPanel" style="grid-column:1/-1;padding:20px">
+      <div class="sp" style="margin-bottom:16px">
+        <div class="title">⚙️ Administration</div>
         <div class="row wrap">
           <input id="adminKey" placeholder="Clé admin" class="mono" />
-          <button class="btn" id="btnSaveAdmin">Enregistrer</button>
-          <button class="btn" id="btnSync">Sync serveur</button>
-          <a class="btn" href="#doc" id="btnDoc">Doc Apps Script</a>
+          <button class="btn" id="btnSaveAdmin">💾 Enregistrer</button>
+          <button class="btn" id="btnSync">🔄 Sync serveur</button>
         </div>
       </div>
-      <div class="row wrap">
-        <div class="mono">Endpoint: <span id="endpointView">local</span></div>
-      </div>
-    </section>
-
-    <section class="panel" style="grid-column:1/-1;padding:14px">
-      <div class="title">Procédure de synchronisation Plaud Note Pro</div>
-      <ol>
-        <li>Récupère l’enregistreur et le smartphone passerelle auprès de Dounia ou Ludivine (Secrétariat général).</li>
-        <li>Allume le Plaud Note Pro, active le mode appairage.</li>
-        <li>Sur le smartphone, ouvre l’app Plaud, menu Appareils, choisis « Ajouter », sélectionne l’enregistreur.</li>
-        <li>Teste un enregistrement court, vérifie la synchronisation et l’export.</li>
-        <li>À la restitution, supprime l’appairage si demandé par Dounia ou Ludivine.</li>
-      </ol>
-      <div class="foot">Les deux Plaud Note Pro et les smartphones dédiés à la synchronisation sont disponibles auprès de Dounia et Ludivine.</div>
     </section>
   </main>
 
-  <dialog id="dlgFb" style="border:1px solid #cbd5e1;background:#fff;border-radius:12px;padding:0;width:min(560px,96vw)">
-    <div class="sp" style="padding:12px 14px;border-bottom:1px solid #e2e8f0">
-      <div class="title">Laisser un commentaire</div>
-      <button class="btn" id="fbClose">Fermer</button>
+  <dialog id="dlgFb">
+    <div class="sp" style="padding:16px 20px;border-bottom:1px solid var(--line)">
+      <div class="title">💬 Laisser un commentaire</div>
+      <button class="btn" id="fbClose">✖ Fermer</button>
     </div>
-    <form id="frmFb" style="padding:12px 14px" class="grid">
+    <form id="frmFb" style="padding:16px 20px" class="grid">
       <div class="muted" id="fbContext"></div>
-      <label>Note
+      <label>Note (1-5)
         <select name="rating" required>
           <option value="">Choisir</option>
-          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>⭐ 1</option>
+          <option>⭐⭐ 2</option>
+          <option>⭐⭐⭐ 3</option>
+          <option>⭐⭐⭐⭐ 4</option>
+          <option>⭐⭐⭐⭐⭐ 5</option>
         </select>
       </label>
-      <textarea name="comment" rows="4" placeholder="Retour d’utilisation, incidents, qualité des transcriptions, etc." required></textarea>
+      <textarea name="comment" rows="4" placeholder="Votre retour d'expérience..." required></textarea>
       <input type="hidden" name="reservation_id" />
-      <button class="btn-primary" type="submit">Envoyer</button>
+      <button class="btn-primary" type="submit">📤 Envoyer</button>
     </form>
   </dialog>
 
   <script>
   // Config
-  const CONFIG = { endpoint: localStorage.getItem('endpoint') || '', adminKey: localStorage.getItem('adminKey') || '' };
+  const CONFIG = { 
+    endpoint: localStorage.getItem('endpoint') || '', 
+    adminKey: localStorage.getItem('adminKey') || '',
+    sheetId: 'YOUR_SHEET_ID' // Remplace par ton ID Google Sheets
+  };
+  
   const TZ = 'Europe/Paris';
 
-  // Catalogue
+  // Catalogue des ressources avec emojis
   const DEFAULT_ITEMS = [
-    {id:'R-PLAUD-1', name:'Plaud Note Pro #1', type:'Matériel', site:'Secrétariat général', notes:'Micro-cravate', serial:'PLODE-1'},
-    {id:'R-PLAUD-2', name:'Plaud Note Pro #2', type:'Matériel', site:'Secrétariat général', notes:'USB-C', serial:'PLODE-2'},
-    {id:'R-CHATGPT', name:'ChatGPT Pro', type:'Abonnement', site:'Licence', notes:'1 licence', serial:'LIC-GPT'},
-    {id:'R-MISTRAL-1', name:'Mistral Pro #1', type:'Abonnement', site:'Licence', notes:'Licence 1', serial:'LIC-MISTRAL-1'},
-    {id:'R-MISTRAL-2', name:'Mistral Pro #2', type:'Abonnement', site:'Licence', notes:'Licence 2', serial:'LIC-MISTRAL-2'},
-    {id:'R-GEMINI', name:'Google Gemini + NotebookLM', type:'Abonnement', site:'Licence', notes:'1 licence', serial:'LIC-GEMINI'},
-    {id:'R-CLAUDE', name:'Claude Pro', type:'Abonnement', site:'Licence', notes:'1 licence', serial:'LIC-CLAUDE'},
-    {id:'R-GAMMA', name:'Gamma Presentations', type:'Abonnement', site:'Licence', notes:'1 licence', serial:'LIC-GAMMA'}
+    {id:'PLAUD-1', name:'Plaud Note Pro #1', type:'Matériel', site:'Secrétariat général', notes:'Micro-cravate intelligent', icon:'🎙️'},
+    {id:'PLAUD-2', name:'Plaud Note Pro #2', type:'Matériel', site:'Secrétariat général', notes:'USB-C, transcription IA', icon:'🎙️'},
+    {id:'CHATGPT', name:'ChatGPT Pro', type:'Abonnement', site:'Licence', notes:'GPT-4 illimité', icon:'💬'},
+    {id:'MISTRAL-1', name:'Mistral Pro #1', type:'Abonnement', site:'Licence', notes:'IA française', icon:'🇫🇷'},
+    {id:'MISTRAL-2', name:'Mistral Pro #2', type:'Abonnement', site:'Licence', notes:'IA française', icon:'🇫🇷'},
+    {id:'GEMINI', name:'Google Gemini + NotebookLM', type:'Abonnement', site:'Licence', notes:'Suite Google IA', icon:'✨'},
+    {id:'CLAUDE', name:'Claude Pro', type:'Abonnement', site:'Licence', notes:'Anthropic Claude 3', icon:'🤖'},
+    {id:'GAMMA', name:'Gamma Presentations', type:'Abonnement', site:'Licence', notes:'Présentations IA', icon:'📊'}
   ];
 
   // Local storage
@@ -197,7 +521,13 @@
     setFb(v){localStorage.setItem('feedback',JSON.stringify(v))}
   };
 
-  let ITEMS = (()=>{const v=store.getItems(); if(Array.isArray(v)&&v.length) return v; store.setItems(DEFAULT_ITEMS); return DEFAULT_ITEMS;})();
+  let ITEMS = (()=>{
+    const v=store.getItems(); 
+    if(Array.isArray(v)&&v.length) return v; 
+    store.setItems(DEFAULT_ITEMS); 
+    return DEFAULT_ITEMS;
+  })();
+  
   let RES = store.getRes();
   let FB  = store.getFb();
   let SELECTED_RESOURCE_ID = (ITEMS[0] && ITEMS[0].id) || null;
@@ -207,65 +537,299 @@
   const fmt = {
     ymd(d){const x=new Date(d); return x.toISOString().slice(0,10)},
     today(){return fmt.ymd(new Date())},
-    weekStart(d){const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x},
+    weekStart(d){
+      const x=new Date(d); 
+      const day=(x.getDay()+6)%7; 
+      x.setDate(x.getDate()-day); 
+      x.setHours(0,0,0,0); 
+      return x
+    },
     addDays(d,n){const x=new Date(d); x.setDate(x.getDate()+n); return x},
     who(r){return `${r.first_name} ${r.last_name} (${r.service})`}
   };
 
-  // Grille ressources
+  // Grille ressources avec design amélioré
   function renderResourceGrid(){
-    const g = el('#resourceGrid'); if(!g) return; g.innerHTML='';
-    const q = el('#q').value.toLowerCase(); const type = el('#typeFilter').value; const site = el('#siteFilter').value;
-    ITEMS.filter(x=>(!type||x.type===type)&&(!site||x.site===site)&&(!q||JSON.stringify(x).toLowerCase().includes(q)))
-      .forEach(x=>{ const d=document.createElement('div'); d.className='card-res'+(SELECTED_RESOURCE_ID===x.id?' active':''); d.dataset.id=x.id;
-        d.innerHTML=`<div class="name">${x.name}</div><div class="meta">${x.type} • ${x.site}</div>`+(x.type==='Abonnement'?`<div class=chip>${x.serial}</div>`:'');
-        d.onclick=()=>{ SELECTED_RESOURCE_ID=x.id; document.querySelectorAll('.card-res').forEach(n=>n.classList.remove('active')); d.classList.add('active'); const f=el('#frmRequest'); if(f && f.resource_id) f.resource_id.value=x.id; renderCalendar(); renderNow(); };
+    const g = el('#resourceGrid'); 
+    if(!g) return; 
+    g.innerHTML='';
+    
+    const q = el('#q').value.toLowerCase(); 
+    const type = el('#typeFilter').value;
+    
+    ITEMS
+      .filter(x=>(!type||x.type===type)&&(!q||JSON.stringify(x).toLowerCase().includes(q)))
+      .forEach(x=>{ 
+        const d=document.createElement('div'); 
+        d.className='card-res'+(SELECTED_RESOURCE_ID===x.id?' active':''); 
+        d.dataset.id=x.id;
+        d.innerHTML=`
+          <div class="icon">${x.icon||'📦'}</div>
+          <div class="name">${x.name}</div>
+          <div class="meta">${x.type} • ${x.site}</div>
+          ${x.notes?`<div class="chip">${x.notes}</div>`:''}
+        `;
+        d.onclick=()=>{ 
+          SELECTED_RESOURCE_ID=x.id; 
+          document.querySelectorAll('.card-res').forEach(n=>n.classList.remove('active')); 
+          d.classList.add('active'); 
+          const f=el('#frmRequest'); 
+          if(f && f.resource_id) f.resource_id.value=x.id; 
+          renderCalendar(); 
+          renderNow(); 
+        };
         g.appendChild(d);
       });
-    if(!SELECTED_RESOURCE_ID && ITEMS.length){ SELECTED_RESOURCE_ID=ITEMS[0].id; renderResourceGrid(); }
+      
+    if(!SELECTED_RESOURCE_ID && ITEMS.length){ 
+      SELECTED_RESOURCE_ID=ITEMS[0].id; 
+      renderResourceGrid(); 
+    }
   }
 
   // Réservations
-  function findReservation(resource_id,date,win){ return RES.find(r=>r.resource_id===resource_id && r.date===date && r.window===win && r.status==='ACTIVE'); }
-
-  // Calendrier
-  let weekOffset=0;
-  function renderCalendar(){
-    const resource_id = SELECTED_RESOURCE_ID || (ITEMS[0]&&ITEMS[0].id); const wrap = el('#calendar'); wrap.innerHTML=''; if(!resource_id) return;
-    const start = fmt.weekStart(new Date(Date.now()+weekOffset*7*24*3600*1000));
-    const header=document.createElement('div'); header.className='h'; header.textContent=''; wrap.appendChild(header);
-    for(let i=0;i<5;i++){ const d=fmt.addDays(start,i); const h=document.createElement('div'); h.className='h'; h.textContent=d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); wrap.appendChild(h);}    
-    ['AM','PM'].forEach(win=>{ const label=document.createElement('div'); label.className='slot'; label.innerHTML= win==='AM' ? 'Matin<br><span class="mono muted">09:30–12:30</span>' : 'Après‑midi<br><span class="mono muted">13:30–17:30</span>'; wrap.appendChild(label);
-      for(let i=0;i<5;i++){ const d=fmt.ymd(fmt.addDays(start,i)); const r=findReservation(resource_id,d,win); const cell=document.createElement('div'); cell.className='slot '+(r?'busy':'free'); cell.dataset.date=d; cell.dataset.window=win; cell.dataset.resource=resource_id; cell.innerHTML=r?`<div class=who>${fmt.who(r)}</div>`:'<span class=muted>Libre</span>'; cell.onclick=onSlotClick; wrap.appendChild(cell);} });
+  function findReservation(resource_id,date,win){ 
+    return RES.find(r=>r.resource_id===resource_id && r.date===date && r.window===win && r.status==='ACTIVE'); 
   }
 
-  function onSlotClick(e){ const c=e.currentTarget; const resource_id=c.dataset.resource; const date=c.dataset.date; const win=c.dataset.window; const r=findReservation(resource_id,date,win); const form=el('#frmRequest'); form.resource_id.value=resource_id; form.date.value=date; form.window.value=win; if(r){ alert('Créneau déjà réservé par '+fmt.who(r)); } else { window.scrollTo({top:0,behavior:'smooth'}); } }
+  // Calendrier amélioré
+  let weekOffset=0;
+  function renderCalendar(){
+    const resource_id = SELECTED_RESOURCE_ID || (ITEMS[0]&&ITEMS[0].id); 
+    const wrap = el('#calendar'); 
+    wrap.innerHTML=''; 
+    if(!resource_id) return;
+    
+    const start = fmt.weekStart(new Date(Date.now()+weekOffset*7*24*3600*1000));
+    
+    // Header vide
+    const header=document.createElement('div'); 
+    header.className='h'; 
+    header.textContent=''; 
+    wrap.appendChild(header);
+    
+    // Headers jours
+    for(let i=0;i<5;i++){ 
+      const d=fmt.addDays(start,i); 
+      const h=document.createElement('div'); 
+      h.className='h'; 
+      h.textContent=d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); 
+      wrap.appendChild(h);
+    }
+    
+    // Slots matin/après-midi
+    ['AM','PM'].forEach(win=>{ 
+      const label=document.createElement('div'); 
+      label.className='slot'; 
+      label.innerHTML= win==='AM' ? 
+        '🌅 <b>Matin</b><br><span class="mono muted">09h30–12h30</span>' : 
+        '☀️ <b>Après‑midi</b><br><span class="mono muted">13h30–17h30</span>'; 
+      wrap.appendChild(label);
+      
+      for(let i=0;i<5;i++){ 
+        const d=fmt.ymd(fmt.addDays(start,i)); 
+        const r=findReservation(resource_id,d,win); 
+        const cell=document.createElement('div'); 
+        cell.className='slot '+(r?'busy':'free'); 
+        cell.dataset.date=d; 
+        cell.dataset.window=win; 
+        cell.dataset.resource=resource_id; 
+        cell.innerHTML=r?
+          `<div class=who>🔒 ${fmt.who(r)}</div>`:
+          '<span class="libre-badge">✓ Libre</span>'; 
+        cell.onclick=onSlotClick; 
+        wrap.appendChild(cell);
+      } 
+    });
+  }
+
+  function onSlotClick(e){ 
+    const c=e.currentTarget; 
+    const resource_id=c.dataset.resource; 
+    const date=c.dataset.date; 
+    const win=c.dataset.window; 
+    const r=findReservation(resource_id,date,win); 
+    const form=el('#frmRequest'); 
+    form.resource_id.value=resource_id; 
+    form.date.value=date; 
+    form.window.value=win; 
+    if(r){ 
+      alert('⚠️ Créneau déjà réservé par '+fmt.who(r)); 
+    } else { 
+      window.scrollTo({top:0,behavior:'smooth'}); 
+      form.date.style.borderColor = 'var(--accent)';
+      form.window.style.borderColor = 'var(--accent)';
+      setTimeout(()=>{
+        form.date.style.borderColor = '';
+        form.window.style.borderColor = '';
+      },2000);
+    } 
+  }
 
   // Soumission réservation
-  function submitRequest(e){ e.preventDefault(); const f=Object.fromEntries(new FormData(e.target)); if(!f.resource_id){alert('Choisis une ressource.');return} const exists=findReservation(f.resource_id,f.date,f.window); if(exists){alert('Ce créneau est déjà réservé.');return} const id='RES-'+Math.random().toString(36).slice(2,10).toUpperCase(); const rec={id,status:'ACTIVE',created_ts:new Date().toISOString(),...f}; RES.push(rec); store.setRes(RES); renderCalendar(); renderNow(); if(CONFIG.endpoint){ fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'reservation.create',payload:rec,adminKey:CONFIG.adminKey})}).catch(()=>{});} e.target.reset(); }
+  function submitRequest(e){ 
+    e.preventDefault(); 
+    const f=Object.fromEntries(new FormData(e.target)); 
+    if(!f.resource_id){
+      alert('⚠️ Veuillez sélectionner une ressource.');
+      return;
+    } 
+    const exists=findReservation(f.resource_id,f.date,f.window); 
+    if(exists){
+      alert('⚠️ Ce créneau est déjà réservé.');
+      return;
+    } 
+    const id='RES-'+Math.random().toString(36).slice(2,10).toUpperCase(); 
+    const rec={id,status:'ACTIVE',created_ts:new Date().toISOString(),...f}; 
+    RES.push(rec); 
+    store.setRes(RES); 
+    renderCalendar(); 
+    renderNow(); 
+    if(CONFIG.endpoint){ 
+      fetch(CONFIG.endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({type:'reservation.create',payload:rec,adminKey:CONFIG.adminKey})
+      }).catch(()=>{}); 
+    } 
+    e.target.reset(); 
+    alert('✅ Réservation confirmée !');
+  }
 
   // Occupants actuels
-  function renderNow(){ const tbl=el('#tblNow'); tbl.innerHTML='<tr><th>Ressource</th><th>Créneau</th><th>Occupant</th><th>Action</th></tr>'; const today=fmt.today(); const win=(new Date().getHours()<13?'AM':'PM'); ITEMS.forEach(it=>{ const r=findReservation(it.id,today,win); const tr=document.createElement('tr'); tr.innerHTML=`<td class=title>${it.name}</td><td class=muted>${win==='AM'?'Matin':'Après‑midi'}</td><td>${r?fmt.who(r):'<span class=muted>Libre</span>'}</td><td>${r?`<button class=btn data-fb='${r.id}'>Commenter</button>`:''}</td>`; tbl.appendChild(tr); }); }
+  function renderNow(){ 
+    const tbl=el('#tblNow'); 
+    tbl.innerHTML='<tr><th>Ressource</th><th>Créneau</th><th>Occupant</th><th>Action</th></tr>'; 
+    const today=fmt.today(); 
+    const win=(new Date().getHours()<13?'AM':'PM'); 
+    
+    ITEMS.forEach(it=>{ 
+      const r=findReservation(it.id,today,win); 
+      const tr=document.createElement('tr'); 
+      tr.innerHTML=`
+        <td class=title>${it.icon||'📦'} ${it.name}</td>
+        <td class=muted>${win==='AM'?'🌅 Matin':'☀️ Après‑midi'}</td>
+        <td>${r?'👤 '+fmt.who(r):'<span class=muted>✓ Libre</span>'}</td>
+        <td>${r?`<button class="btn" data-fb='${r.id}'>💬 Commenter</button>`:''}</td>
+      `; 
+      tbl.appendChild(tr); 
+    }); 
+  }
 
   // Feedback
-  function openFb(resId){ const r=RES.find(x=>x.id===resId); if(!r) return; const it=ITEMS.find(x=>x.id===r.resource_id); el('#fbContext').textContent=`${it.name} – ${r.date} ${r.window==='AM'?'Matin':'Après‑midi'} (par ${fmt.who(r)})`; el('#frmFb input[name="reservation_id"]').value=r.id; dlgFb.showModal(); }
-  function submitFb(e){ e.preventDefault(); const f=Object.fromEntries(new FormData(e.target)); const id='FB-'+Math.random().toString(36).slice(2,10).toUpperCase(); const it=RES.find(r=>r.id===f.reservation_id); const rec={id,created_ts:new Date().toISOString(),resource_id:it.resource_id,reservation_id:f.reservation_id,rating:+f.rating,comment:f.comment}; FB.unshift(rec); store.setFb(FB); renderFb(); dlgFb.close(); if(CONFIG.endpoint){ fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'feedback.create',payload:rec,adminKey:CONFIG.adminKey})}).catch(()=>{});} e.target.reset(); }
-  function renderFb(){ const tbl=el('#tblFb'); tbl.innerHTML='<tr><th>Ressource</th><th>Note</th><th>Commentaire</th><th>Date</th></tr>'; FB.slice(0,20).forEach(f=>{ const it=ITEMS.find(x=>x.id===f.resource_id)||{name:'(supprimé)'}; const tr=document.createElement('tr'); tr.innerHTML=`<td class=title>${it.name}</td><td>${f.rating}</td><td>${f.comment}</td><td class=muted>${new Date(f.created_ts).toLocaleString('fr-FR')}</td>`; tbl.appendChild(tr); }); }
+  function openFb(resId){ 
+    const r=RES.find(x=>x.id===resId); 
+    if(!r) return; 
+    const it=ITEMS.find(x=>x.id===r.resource_id); 
+    el('#fbContext').textContent=`${it.name} – ${r.date} ${r.window==='AM'?'Matin':'Après‑midi'} (par ${fmt.who(r)})`; 
+    el('#frmFb input[name="reservation_id"]').value=r.id; 
+    dlgFb.showModal(); 
+  }
+  
+  function submitFb(e){ 
+    e.preventDefault(); 
+    const f=Object.fromEntries(new FormData(e.target)); 
+    const id='FB-'+Math.random().toString(36).slice(2,10).toUpperCase(); 
+    const it=RES.find(r=>r.id===f.reservation_id); 
+    const rating = f.rating.replace(/[^0-9]/g,'');
+    const rec={
+      id,
+      created_ts:new Date().toISOString(),
+      resource_id:it.resource_id,
+      reservation_id:f.reservation_id,
+      rating:+rating,
+      comment:f.comment
+    }; 
+    FB.unshift(rec); 
+    store.setFb(FB); 
+    renderFb(); 
+    dlgFb.close(); 
+    if(CONFIG.endpoint){ 
+      fetch(CONFIG.endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({type:'feedback.create',payload:rec,adminKey:CONFIG.adminKey})
+      }).catch(()=>{}); 
+    } 
+    e.target.reset(); 
+    alert('✅ Merci pour votre feedback !');
+  }
+  
+  function renderFb(){ 
+    const tbl=el('#tblFb'); 
+    tbl.innerHTML='<tr><th>Ressource</th><th>Note</th><th>Commentaire</th><th>Date</th></tr>'; 
+    FB.slice(0,20).forEach(f=>{ 
+      const it=ITEMS.find(x=>x.id===f.resource_id)||{name:'(supprimé)'}; 
+      const tr=document.createElement('tr'); 
+      const stars = '⭐'.repeat(f.rating);
+      tr.innerHTML=`
+        <td class=title>${it.icon||'📦'} ${it.name}</td>
+        <td>${stars}</td>
+        <td>${f.comment}</td>
+        <td class=muted>${new Date(f.created_ts).toLocaleString('fr-FR')}</td>
+      `; 
+      tbl.appendChild(tr); 
+    }); 
+  }
 
   // Export CSV
-  function exportCSV(){ const rows=[["id","resource_id","date","window","first_name","last_name","service","status","created_ts"]].concat(RES.map(r=>[r.id,r.resource_id,r.date,r.window,r.first_name,r.last_name,r.service,r.status,r.created_ts])); const csv=rows.map(r=>r.map(x=>`"${(x||'').toString().replaceAll('"','""')}"`).join(',')).join('
-'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='reservations.csv'; a.click(); URL.revokeObjectURL(url); }
+  function exportCSV(){ 
+    const rows=[
+      ["id","resource_id","date","window","first_name","last_name","service","status","created_ts"]
+    ].concat(RES.map(r=>[
+      r.id,r.resource_id,r.date,r.window,r.first_name,r.last_name,r.service,r.status,r.created_ts
+    ])); 
+    const csv=rows.map(r=>r.map(x=>`"${(x||'').toString().replaceAll('"','""')}"`).join(',')).join('\n'); 
+    const blob=new Blob([csv],{type:'text/csv'}); 
+    const url=URL.createObjectURL(blob); 
+    const a=document.createElement('a'); 
+    a.href=url; 
+    a.download='reservations_'+new Date().toISOString().slice(0,10)+'.csv'; 
+    a.click(); 
+    URL.revokeObjectURL(url); 
+  }
 
   // Admin + Sync
-  function saveAdmin(){ CONFIG.adminKey=el('#adminKey').value.trim(); localStorage.setItem('adminKey',CONFIG.adminKey); alert('Clé admin mise à jour'); }
-  function syncServer(){ if(!CONFIG.endpoint){alert('Aucun endpoint configuré.');return} const payload={type:'sync',payload:{items:ITEMS,reservations:RES,feedback:FB},adminKey:CONFIG.adminKey}; fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>r.json()).then(x=>alert('Sync OK: '+(x&&x.ok))).catch(()=>alert('Erreur de sync')); }
+  function saveAdmin(){ 
+    CONFIG.adminKey=el('#adminKey').value.trim(); 
+    localStorage.setItem('adminKey',CONFIG.adminKey); 
+    alert('✅ Clé admin mise à jour'); 
+  }
+  
+  function syncServer(){ 
+    if(!CONFIG.endpoint){
+      alert('⚠️ Aucun endpoint configuré.');
+      return;
+    } 
+    const payload={
+      type:'sync',
+      payload:{items:ITEMS,reservations:RES,feedback:FB},
+      adminKey:CONFIG.adminKey
+    }; 
+    fetch(CONFIG.endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    })
+    .then(r=>r.json())
+    .then(x=>alert('✅ Sync OK: '+(x&&x.ok)))
+    .catch(()=>alert('❌ Erreur de sync')); 
+  }
 
   // Listeners
-  document.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; if(b.id==='prevWeek'){weekOffset--; renderCalendar();} if(b.id==='nextWeek'){weekOffset++; renderCalendar();} if(b.id==='btnExport') exportCSV(); if(b.id==='btnAdmin') el('#adminPanel').classList.toggle('hidden'); if(b.dataset.fb) openFb(b.dataset.fb); });
+  document.addEventListener('click',e=>{ 
+    const b=e.target.closest('button'); 
+    if(!b) return; 
+    if(b.id==='prevWeek'){weekOffset--; renderCalendar();} 
+    if(b.id==='nextWeek'){weekOffset++; renderCalendar();} 
+    if(b.id==='btnExport') exportCSV(); 
+    if(b.id==='btnAdmin') el('#adminPanel').classList.toggle('hidden'); 
+    if(b.dataset.fb) openFb(b.dataset.fb); 
+  });
+  
   el('#frmRequest').addEventListener('submit',submitRequest);
   el('#q').addEventListener('input',()=>{renderResourceGrid();});
   el('#typeFilter').addEventListener('change',()=>{renderResourceGrid();});
-  el('#siteFilter').addEventListener('change',()=>{renderResourceGrid();});
   el('#btnSaveAdmin').addEventListener('click',saveAdmin);
   el('#btnSync').addEventListener('click',syncServer);
   el('#fbClose').addEventListener('click',()=>dlgFb.close());
@@ -273,13 +837,10 @@
 
   // Boot
   (function init(){
-    // init filtres
-    const typeSel=el('#typeFilter'); ['Matériel','Abonnement'].forEach(t=>{const o=document.createElement('option');o.textContent=t;o.value=t;typeSel.appendChild(o)});
-    const siteSel=el('#siteFilter'); const sites=['Tous les sites',...new Set(ITEMS.map(x=>x.site))]; sites.forEach((s,i)=>{const o=document.createElement('option');o.textContent=s;o.value=i? s:'';siteSel.appendChild(o)});
-    // init form
-    const f=el('#frmRequest'); if(f && f.resource_id && SELECTED_RESOURCE_ID) f.resource_id.value=SELECTED_RESOURCE_ID;
-    renderResourceGrid(); renderCalendar(); renderNow(); renderFb();
-    el('#endpointView').textContent = CONFIG.endpoint || '(non défini)';
+    renderResourceGrid(); 
+    renderCalendar(); 
+    renderNow(); 
+    renderFb();
   })();
   </script>
 </body>
