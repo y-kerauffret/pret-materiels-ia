@@ -390,9 +390,10 @@
           <option value="Abonnement">Abonnement</option>
         </select>
         <input id="q" placeholder="🔍 Rechercher..." />
-        <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit" target="_blank" class="sheets-link">
+        <a href="#" id="sheetsLink" target="_blank" class="sheets-link">
           📊 Google Sheets
         </a>
+        <span id="syncStatus" style="color:var(--ok);font-size:12px;margin-left:8px;display:none">✓ Synchronisé</span>
       </div>
     </div>
   </header>
@@ -458,9 +459,32 @@
       <div class="sp" style="margin-bottom:16px">
         <div class="title">⚙️ Administration</div>
         <div class="row wrap">
-          <input id="adminKey" placeholder="Clé admin" class="mono" />
-          <button class="btn" id="btnSaveAdmin">💾 Enregistrer</button>
-          <button class="btn" id="btnSync">🔄 Sync serveur</button>
+          <button class="btn" id="btnSync">🔄 Sync avec Google Sheets</button>
+          <button class="btn" onclick="window.open('https://docs.google.com/spreadsheets/d/'+CONFIG.sheetId+'/edit','_blank')">📊 Ouvrir la Sheet</button>
+        </div>
+      </div>
+      <div class="grid" style="gap:12px;margin-top:16px">
+        <div>
+          <label style="display:block;margin-bottom:8px;color:var(--muted)">Clé Admin (maurepas2025)</label>
+          <input id="adminKey" placeholder="Clé admin" class="mono" value="" />
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:8px;color:var(--muted)">URL du Script Apps Script</label>
+          <input id="endpointInput" placeholder="https://script.google.com/macros/s/.../exec" class="mono" style="width:100%" />
+        </div>
+        <button class="btn-primary" id="btnSaveAdmin">💾 Enregistrer la configuration</button>
+      </div>
+      <div class="foot" style="margin-top:16px">
+        <div class="mono">Endpoint actuel: <span id="endpointView">non configuré</span></div>
+        <div style="margin-top:8px">
+          <strong>📝 Instructions de configuration:</strong>
+          <ol style="margin:8px 0;padding-left:20px;font-size:13px">
+            <li>Dans Google Sheets, va dans Extensions → Apps Script</li>
+            <li>Colle le code du script fourni</li>
+            <li>Déploie → Nouveau déploiement → Type: Application Web</li>
+            <li>Exécuter en tant que: Moi / Accès: Tout le monde</li>
+            <li>Copie l'URL de déploiement et colle-la ci-dessus</li>
+          </ol>
         </div>
       </div>
     </section>
@@ -490,11 +514,15 @@
   </dialog>
 
   <script>
-  // Config
+  // Config - À CONFIGURER
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Remplace par l'URL de déploiement de ton Apps Script
+  const SHEET_ID = 'YOUR_SHEET_ID'; // Remplace par l'ID de ta Google Sheet
+  const ADMIN_KEY_DEFAULT = 'maurepas2025'; // Clé admin par défaut
+  
   const CONFIG = { 
-    endpoint: localStorage.getItem('endpoint') || '', 
-    adminKey: localStorage.getItem('adminKey') || '',
-    sheetId: 'YOUR_SHEET_ID' // Remplace par ton ID Google Sheets
+    endpoint: localStorage.getItem('endpoint') || APPS_SCRIPT_URL, 
+    adminKey: localStorage.getItem('adminKey') || ADMIN_KEY_DEFAULT,
+    sheetId: SHEET_ID
   };
   
   const TZ = 'Europe/Paris';
@@ -685,15 +713,36 @@
     store.setRes(RES); 
     renderCalendar(); 
     renderNow(); 
-    if(CONFIG.endpoint){ 
+    
+    // Envoi au script Apps Script
+    if(CONFIG.endpoint && CONFIG.endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
+        mode:'no-cors', // Important pour Apps Script
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({type:'reservation.create',payload:rec,adminKey:CONFIG.adminKey})
-      }).catch(()=>{}); 
+        body:JSON.stringify({
+          type:'reservation.create',
+          payload:rec,
+          adminKey:CONFIG.adminKey
+        })
+      }).then(()=>{
+        showSyncStatus('✓ Sauvegardé dans Google Sheets');
+      }).catch((err)=>{
+        console.log('Erreur sync:', err);
+      }); 
     } 
     e.target.reset(); 
     alert('✅ Réservation confirmée !');
+  }
+
+  // Fonction pour afficher le statut de sync
+  function showSyncStatus(msg){
+    const status = el('#syncStatus');
+    if(status){
+      status.textContent = msg;
+      status.style.display = 'inline';
+      setTimeout(()=>{ status.style.display = 'none'; }, 3000);
+    }
   }
 
   // Occupants actuels
@@ -744,12 +793,23 @@
     store.setFb(FB); 
     renderFb(); 
     dlgFb.close(); 
-    if(CONFIG.endpoint){ 
+    
+    // Envoi au script Apps Script
+    if(CONFIG.endpoint && CONFIG.endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
+        mode:'no-cors', // Important pour Apps Script
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({type:'feedback.create',payload:rec,adminKey:CONFIG.adminKey})
-      }).catch(()=>{}); 
+        body:JSON.stringify({
+          type:'feedback.create',
+          payload:rec,
+          adminKey:CONFIG.adminKey
+        })
+      }).then(()=>{
+        showSyncStatus('✓ Feedback envoyé');
+      }).catch((err)=>{
+        console.log('Erreur sync feedback:', err);
+      }); 
     } 
     e.target.reset(); 
     alert('✅ Merci pour votre feedback !');
@@ -793,27 +853,39 @@
   function saveAdmin(){ 
     CONFIG.adminKey=el('#adminKey').value.trim(); 
     localStorage.setItem('adminKey',CONFIG.adminKey); 
-    alert('✅ Clé admin mise à jour'); 
+    CONFIG.endpoint = el('#endpointInput').value.trim() || APPS_SCRIPT_URL;
+    localStorage.setItem('endpoint', CONFIG.endpoint);
+    alert('✅ Configuration mise à jour'); 
   }
   
   function syncServer(){ 
-    if(!CONFIG.endpoint){
-      alert('⚠️ Aucun endpoint configuré.');
+    if(!CONFIG.endpoint || CONFIG.endpoint === 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){
+      alert('⚠️ Veuillez configurer l\'URL du script Apps Script dans Admin.');
       return;
     } 
     const payload={
       type:'sync',
-      payload:{items:ITEMS,reservations:RES,feedback:FB},
+      payload:{
+        items:ITEMS,
+        reservations:RES,
+        feedback:FB
+      },
       adminKey:CONFIG.adminKey
     }; 
     fetch(CONFIG.endpoint,{
       method:'POST',
+      mode:'no-cors',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     })
-    .then(r=>r.json())
-    .then(x=>alert('✅ Sync OK: '+(x&&x.ok)))
-    .catch(()=>alert('❌ Erreur de sync')); 
+    .then(()=>{
+      showSyncStatus('✅ Synchronisation complète');
+      alert('✅ Données synchronisées avec Google Sheets');
+    })
+    .catch((err)=>{
+      console.log('Erreur:', err);
+      alert('❌ Erreur de synchronisation');
+    }); 
   }
 
   // Listeners
@@ -841,6 +913,34 @@
     renderCalendar(); 
     renderNow(); 
     renderFb();
+    
+    // Configuration initiale
+    const endpoint = CONFIG.endpoint;
+    const endpointView = el('#endpointView');
+    const endpointInput = el('#endpointInput');
+    const adminKeyInput = el('#adminKey');
+    const sheetsLink = el('#sheetsLink');
+    
+    if(endpoint && endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){
+      endpointView.textContent = 'Configuré ✓';
+      endpointView.style.color = 'var(--ok)';
+    } else {
+      endpointView.textContent = 'Non configuré - Voir instructions ci-dessous';
+      endpointView.style.color = 'var(--warn)';
+    }
+    
+    if(endpointInput) endpointInput.value = CONFIG.endpoint || '';
+    if(adminKeyInput) adminKeyInput.value = CONFIG.adminKey || '';
+    
+    // Mise à jour du lien Google Sheets
+    if(sheetsLink && CONFIG.sheetId && CONFIG.sheetId !== 'YOUR_SHEET_ID'){
+      sheetsLink.href = `https://docs.google.com/spreadsheets/d/${CONFIG.sheetId}/edit`;
+    } else if(sheetsLink) {
+      sheetsLink.onclick = (e) => {
+        e.preventDefault();
+        alert('⚠️ Veuillez configurer l\'ID de la Google Sheet dans le code');
+      };
+    }
   })();
   </script>
 </body>
