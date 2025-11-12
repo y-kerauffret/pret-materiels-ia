@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prêt de matériels IA – Réservations • build 2025-11-10-16h00</title>
+  <title>Prêt de matériels IA – Réservations • v2</title>
   <style>
     :root{
       --bg:#0f1419;
@@ -21,10 +21,11 @@
       --chip:#162033;
       --chip-border:#2d4a7c;
       --input-bg:#0d1117;
-      --slot-free:#162033;
-      --slot-free-hover:#1e2d47;
-      --slot-busy:#2d1b1b;
-      --slot-busy-border:#4a2626;
+      --day-free:#162033;
+      --day-free-hover:#1e2d47;
+      --day-busy:#4a2626;
+      --day-selected:#1e3a5f;
+      --day-partial:#3d3020;
     }
     
     *{box-sizing:border-box}
@@ -83,6 +84,7 @@
       border-radius:16px;
       box-shadow:0 10px 40px rgba(0,0,0,0.4);
       transition:transform 0.2s,box-shadow 0.2s;
+      padding:20px;
     }
     
     .panel:hover{
@@ -270,75 +272,126 @@
       font-weight:500;
     }
 
-    /* Calendrier amélioré */
-    .calendar{
-      display:grid;
-      grid-template-columns:140px repeat(5,1fr);
-      border:1px solid var(--line);
-      border-radius:14px;
-      overflow:hidden;
-      background:var(--input-bg);
+    /* Calendrier mensuel */
+    .calendar-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:16px;
     }
     
-    .calendar .h{
-      background:linear-gradient(135deg,rgba(79,156,249,0.1),rgba(79,156,249,0.05));
-      padding:12px;
+    .calendar-month{
+      font-size:20px;
       font-weight:700;
-      border-bottom:1px solid var(--line);
       color:var(--text);
     }
     
-    .slot{
-      padding:14px;
-      border-left:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-      min-height:70px;
+    .calendar-grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:4px;
+      background:var(--input-bg);
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+    
+    .calendar-weekday{
+      text-align:center;
+      font-weight:600;
+      color:var(--muted);
+      padding:8px 4px;
+      font-size:12px;
+    }
+    
+    .calendar-day{
+      aspect-ratio:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
       cursor:pointer;
       transition:all 0.2s;
       position:relative;
+      border:1px solid transparent;
     }
     
-    .slot.free{
-      background:var(--slot-free);
+    .calendar-day.free{
+      background:var(--day-free);
     }
     
-    .slot.free:hover{
-      background:var(--slot-free-hover);
-      box-shadow:inset 0 0 20px rgba(79,156,249,0.1);
+    .calendar-day.free:hover{
+      background:var(--day-free-hover);
+      border-color:var(--accent);
     }
     
-    .slot.busy{
-      background:var(--slot-busy);
-      border-left:2px solid var(--err);
+    .calendar-day.busy{
+      background:var(--day-busy);
       cursor:not-allowed;
+      opacity:0.7;
     }
     
-    .slot .who{
-      font-size:13px;
-      color:var(--text);
+    .calendar-day.partial{
+      background:var(--day-partial);
+    }
+    
+    .calendar-day.selected{
+      background:var(--day-selected);
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(79,156,249,0.3);
+    }
+    
+    .calendar-day.start-date{
+      border-radius:8px 0 0 8px;
+      background:linear-gradient(90deg,var(--day-selected),var(--day-selected));
+    }
+    
+    .calendar-day.end-date{
+      border-radius:0 8px 8px 0;
+    }
+    
+    .calendar-day.in-range{
+      border-radius:0;
+      background:var(--day-selected);
+      opacity:0.8;
+    }
+    
+    .calendar-day.other-month{
+      opacity:0.3;
+    }
+    
+    .calendar-day-number{
+      font-size:14px;
       font-weight:500;
     }
     
-    .slot .libre-badge{
-      display:inline-block;
-      padding:4px 8px;
-      background:rgba(74,222,128,0.1);
-      color:var(--ok);
-      border-radius:6px;
+    .calendar-day-info{
+      font-size:10px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    
+    /* Légende */
+    .legend{
+      display:flex;
+      gap:16px;
+      margin-top:12px;
       font-size:12px;
-      font-weight:600;
     }
     
-    /* Animations */
-    @keyframes slideIn{
-      from{opacity:0;transform:translateY(20px)}
-      to{opacity:1;transform:translateY(0)}
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
     }
     
-    .panel{
-      animation:slideIn 0.5s ease-out;
+    .legend-color{
+      width:16px;
+      height:16px;
+      border-radius:4px;
     }
-    
+
     /* Dialog amélioré */
     dialog{
       border:1px solid var(--line);
@@ -374,6 +427,28 @@
       transform:translateY(-1px);
       box-shadow:0 4px 12px rgba(52,168,83,0.4);
     }
+    
+    /* Badge de réservation */
+    .res-badge{
+      display:inline-block;
+      padding:4px 8px;
+      background:rgba(79,156,249,0.2);
+      color:var(--accent);
+      border-radius:6px;
+      font-size:11px;
+      font-weight:600;
+      margin-top:4px;
+    }
+    
+    /* Animations */
+    @keyframes slideIn{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    
+    .panel{
+      animation:slideIn 0.5s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -381,7 +456,7 @@
     <div class="wrap sp">
       <div>
         <h1>🤖 Prêt de matériels IA</h1>
-        <div class="sub">Réservation de ressources IA • Créneaux demi-journée</div>
+        <div class="sub">Réservation de ressources IA • Périodes flexibles</div>
       </div>
       <div class="row">
         <select id="typeFilter">
@@ -399,26 +474,46 @@
   </header>
 
   <main class="wrap grid cols-2" style="margin-top:24px">
-    <section class="panel" style="padding:20px">
+    <section class="panel">
       <div class="sp" style="margin-bottom:16px">
         <div>
           <div class="title">📅 Ressources disponibles</div>
           <div class="muted" style="font-size:13px">Sélectionnez une ressource pour voir son planning</div>
         </div>
-        <div class="row">
-          <button class="btn" id="prevWeek">◀ Semaine -1</button>
-          <button class="btn" id="nextWeek">Semaine +1 ▶</button>
-        </div>
       </div>
       
       <div id="resourceGrid" class="res-grid"></div>
       
-      <div class="title" style="margin:20px 0 12px">📆 Planning hebdomadaire</div>
-      <div id="calendar" class="calendar"></div>
-      <div class="foot">⏰ Créneaux: 09h30–12h30 (matin), 13h30–17h30 (après-midi)</div>
+      <div class="title" style="margin:20px 0 12px">📆 Calendrier des disponibilités</div>
+      <div class="calendar-header">
+        <button class="btn" id="prevMonth">◀ Mois précédent</button>
+        <div class="calendar-month" id="currentMonth">Novembre 2025</div>
+        <button class="btn" id="nextMonth">Mois suivant ▶</button>
+      </div>
+      
+      <div class="calendar-grid" id="calendar"></div>
+      
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--day-free)"></div>
+          <span>Disponible</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--day-selected)"></div>
+          <span>Votre sélection</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--day-busy)"></div>
+          <span>Réservé</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:var(--day-partial)"></div>
+          <span>Partiellement disponible</span>
+        </div>
+      </div>
     </section>
 
-    <section class="panel" style="padding:20px">
+    <section class="panel">
       <div class="title" style="margin-bottom:16px">✨ Nouvelle réservation</div>
       <form id="frmRequest" class="grid" style="gap:12px">
         <div class="row">
@@ -427,24 +522,29 @@
         </div>
         <input name="service" placeholder="Service / Direction" required />
         <input type="hidden" name="resource_id" />
-        <div class="row">
-          <input type="date" name="date" required />
-          <select name="window" required>
-            <option value="AM">🌅 Matin (09h30–12h30)</option>
-            <option value="PM">☀️ Après-midi (13h30–17h30)</option>
-          </select>
+        <div>
+          <label style="display:block;margin-bottom:8px;color:var(--muted)">📅 Date de début</label>
+          <input type="date" name="date_start" required />
         </div>
-        <button class="btn-primary" type="submit">🚀 Réserver ce créneau</button>
+        <div>
+          <label style="display:block;margin-bottom:8px;color:var(--muted)">📅 Date de fin</label>
+          <input type="date" name="date_end" required />
+        </div>
+        <div id="reservationSummary" class="hidden" style="padding:12px;background:var(--chip);border-radius:8px;border:1px solid var(--chip-border)">
+          <div style="font-weight:600;margin-bottom:4px">📌 Récapitulatif</div>
+          <div id="summaryText" style="font-size:13px;color:var(--muted)"></div>
+        </div>
+        <button class="btn-primary" type="submit">🚀 Réserver cette période</button>
       </form>
-      <div class="foot">ℹ️ Règle: premier arrivé, premier servi</div>
+      <div class="foot">ℹ️ Vous pouvez réserver plusieurs jours consécutifs</div>
       
       <hr style="border:1px solid var(--line);margin:20px 0"/>
       
-      <div class="title">👥 Occupations actuelles</div>
-      <table class="table" id="tblNow"></table>
+      <div class="title">📋 Mes réservations actives</div>
+      <div id="myReservations"></div>
     </section>
 
-    <section class="panel" style="grid-column:1/-1;padding:20px">
+    <section class="panel" style="grid-column:1/-1">
       <div class="sp" style="margin-bottom:16px">
         <div class="title">💬 Feedbacks récents</div>
         <div class="row">
@@ -455,7 +555,7 @@
       <table class="table" id="tblFb"></table>
     </section>
 
-    <section class="panel hidden" id="adminPanel" style="grid-column:1/-1;padding:20px">
+    <section class="panel hidden" id="adminPanel" style="grid-column:1/-1">
       <div class="sp" style="margin-bottom:16px">
         <div class="title">⚙️ Administration</div>
         <div class="row wrap">
@@ -476,16 +576,6 @@
       </div>
       <div class="foot" style="margin-top:16px">
         <div class="mono">Endpoint actuel: <span id="endpointView">non configuré</span></div>
-        <div style="margin-top:8px">
-          <strong>📝 Instructions de configuration:</strong>
-          <ol style="margin:8px 0;padding-left:20px;font-size:13px">
-            <li>Dans Google Sheets, va dans Extensions → Apps Script</li>
-            <li>Colle le code du script fourni</li>
-            <li>Déploie → Nouveau déploiement → Type: Application Web</li>
-            <li>Exécuter en tant que: Moi / Accès: Tout le monde</li>
-            <li>Copie l'URL de déploiement et colle-la ci-dessus</li>
-          </ol>
-        </div>
       </div>
     </section>
   </main>
@@ -495,39 +585,39 @@
       <div class="title">💬 Laisser un commentaire</div>
       <button class="btn" id="fbClose">✖ Fermer</button>
     </div>
-    <form id="frmFb" style="padding:16px 20px" class="grid">
+    <form id="frmFb" style="padding:16px 20px" class="grid" style="gap:12px">
       <div class="muted" id="fbContext"></div>
-      <label>Note (1-5)
-        <select name="rating" required>
-          <option value="">Choisir</option>
-          <option>⭐ 1</option>
-          <option>⭐⭐ 2</option>
-          <option>⭐⭐⭐ 3</option>
-          <option>⭐⭐⭐⭐ 4</option>
-          <option>⭐⭐⭐⭐⭐ 5</option>
+      <label style="display:block;margin-bottom:8px">Note (1-5)
+        <select name="rating" required style="width:100%;margin-top:8px">
+          <option value="">Choisir une note</option>
+          <option value="1">⭐ 1 - Insuffisant</option>
+          <option value="2">⭐⭐ 2 - Moyen</option>
+          <option value="3">⭐⭐⭐ 3 - Bien</option>
+          <option value="4">⭐⭐⭐⭐ 4 - Très bien</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
         </select>
       </label>
-      <textarea name="comment" rows="4" placeholder="Votre retour d'expérience..." required></textarea>
+      <label style="display:block">Commentaire
+        <textarea name="comment" rows="4" placeholder="Votre retour d'expérience..." required style="width:100%;margin-top:8px"></textarea>
+      </label>
       <input type="hidden" name="reservation_id" />
-      <button class="btn-primary" type="submit">📤 Envoyer</button>
+      <button class="btn-primary" type="submit">📤 Envoyer le feedback</button>
     </form>
   </dialog>
 
   <script>
   // Config - À CONFIGURER
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxit2Zhusl46Kr2hifBefNXo9Y2xgvBktG8qbiP6YMF6b8CuviybmdoMjWGej4ho3mK/exec'; // Remplace par l'URL de déploiement de ton Apps Script
-  const SHEET_ID = 'AKfycbxit2Zhusl46Kr2hifBefNXo9Y2xgvBktG8qbiP6YMF6b8CuviybmdoMjWGej4ho3mK'; // Remplace par l'ID de ta Google Sheet
-  const ADMIN_KEY_DEFAULT = 'maurepas2025'; // Clé admin par défaut
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Remplace par l'URL de déploiement
+  const SHEET_ID = 'YOUR_SHEET_ID'; // Remplace par l'ID de ta Google Sheet
+  const ADMIN_KEY_DEFAULT = 'maurepas2025';
   
   const CONFIG = { 
     endpoint: localStorage.getItem('endpoint') || APPS_SCRIPT_URL, 
     adminKey: localStorage.getItem('adminKey') || ADMIN_KEY_DEFAULT,
     sheetId: SHEET_ID
   };
-  
-  const TZ = 'Europe/Paris';
 
-  // Catalogue des ressources avec emojis
+  // Catalogue des ressources
   const DEFAULT_ITEMS = [
     {id:'PLAUD-1', name:'Plaud Note Pro #1', type:'Matériel', site:'Secrétariat général', notes:'Micro-cravate intelligent', icon:'🎙️'},
     {id:'PLAUD-2', name:'Plaud Note Pro #2', type:'Matériel', site:'Secrétariat général', notes:'USB-C, transcription IA', icon:'🎙️'},
@@ -559,24 +649,31 @@
   let RES = store.getRes();
   let FB  = store.getFb();
   let SELECTED_RESOURCE_ID = (ITEMS[0] && ITEMS[0].id) || null;
+  let SELECTED_START_DATE = null;
+  let SELECTED_END_DATE = null;
+  let CURRENT_MONTH = new Date();
 
   // Helpers
   const el = s=>document.querySelector(s);
   const fmt = {
     ymd(d){const x=new Date(d); return x.toISOString().slice(0,10)},
-    today(){return fmt.ymd(new Date())},
-    weekStart(d){
-      const x=new Date(d); 
-      const day=(x.getDay()+6)%7; 
-      x.setDate(x.getDate()-day); 
-      x.setHours(0,0,0,0); 
-      return x
+    formatDate(d){
+      const x=new Date(d);
+      return x.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
     },
-    addDays(d,n){const x=new Date(d); x.setDate(x.getDate()+n); return x},
-    who(r){return `${r.first_name} ${r.last_name} (${r.service})`}
+    getDaysInMonth(year, month){
+      return new Date(year, month + 1, 0).getDate();
+    },
+    getFirstDayOfMonth(year, month){
+      return new Date(year, month, 1).getDay();
+    },
+    daysBetween(d1, d2){
+      const ms = Math.abs(new Date(d2) - new Date(d1));
+      return Math.floor(ms / (1000 * 60 * 60 * 24)) + 1;
+    }
   };
 
-  // Grille ressources avec design amélioré
+  // Grille ressources
   function renderResourceGrid(){
     const g = el('#resourceGrid'); 
     if(!g) return; 
@@ -591,11 +688,16 @@
         const d=document.createElement('div'); 
         d.className='card-res'+(SELECTED_RESOURCE_ID===x.id?' active':''); 
         d.dataset.id=x.id;
+        
+        // Compter les réservations actives
+        const activeRes = RES.filter(r=>r.resource_id===x.id && r.status==='ACTIVE').length;
+        
         d.innerHTML=`
           <div class="icon">${x.icon||'📦'}</div>
           <div class="name">${x.name}</div>
           <div class="meta">${x.type} • ${x.site}</div>
           ${x.notes?`<div class="chip">${x.notes}</div>`:''}
+          ${activeRes > 0 ? `<div class="res-badge">${activeRes} réservation(s)</div>` : ''}
         `;
         d.onclick=()=>{ 
           SELECTED_RESOURCE_ID=x.id; 
@@ -603,8 +705,8 @@
           d.classList.add('active'); 
           const f=el('#frmRequest'); 
           if(f && f.resource_id) f.resource_id.value=x.id; 
-          renderCalendar(); 
-          renderNow(); 
+          renderCalendar();
+          renderMyReservations();
         };
         g.appendChild(d);
       });
@@ -615,110 +717,202 @@
     }
   }
 
-  // Réservations
-  function findReservation(resource_id,date,win){ 
-    return RES.find(r=>r.resource_id===resource_id && r.date===date && r.window===win && r.status==='ACTIVE'); 
-  }
-
-  // Calendrier amélioré
-  let weekOffset=0;
-  function renderCalendar(){
-    const resource_id = SELECTED_RESOURCE_ID || (ITEMS[0]&&ITEMS[0].id); 
-    const wrap = el('#calendar'); 
-    wrap.innerHTML=''; 
-    if(!resource_id) return;
-    
-    const start = fmt.weekStart(new Date(Date.now()+weekOffset*7*24*3600*1000));
-    
-    // Header vide
-    const header=document.createElement('div'); 
-    header.className='h'; 
-    header.textContent=''; 
-    wrap.appendChild(header);
-    
-    // Headers jours
-    for(let i=0;i<5;i++){ 
-      const d=fmt.addDays(start,i); 
-      const h=document.createElement('div'); 
-      h.className='h'; 
-      h.textContent=d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); 
-      wrap.appendChild(h);
-    }
-    
-    // Slots matin/après-midi
-    ['AM','PM'].forEach(win=>{ 
-      const label=document.createElement('div'); 
-      label.className='slot'; 
-      label.innerHTML= win==='AM' ? 
-        '🌅 <b>Matin</b><br><span class="mono muted">09h30–12h30</span>' : 
-        '☀️ <b>Après‑midi</b><br><span class="mono muted">13h30–17h30</span>'; 
-      wrap.appendChild(label);
-      
-      for(let i=0;i<5;i++){ 
-        const d=fmt.ymd(fmt.addDays(start,i)); 
-        const r=findReservation(resource_id,d,win); 
-        const cell=document.createElement('div'); 
-        cell.className='slot '+(r?'busy':'free'); 
-        cell.dataset.date=d; 
-        cell.dataset.window=win; 
-        cell.dataset.resource=resource_id; 
-        cell.innerHTML=r?
-          `<div class=who>🔒 ${fmt.who(r)}</div>`:
-          '<span class="libre-badge">✓ Libre</span>'; 
-        cell.onclick=onSlotClick; 
-        wrap.appendChild(cell);
-      } 
+  // Vérifier si une date est dans une période de réservation
+  function isDateBusy(resource_id, date){
+    const dateStr = fmt.ymd(date);
+    return RES.some(r => {
+      if(r.resource_id !== resource_id || r.status !== 'ACTIVE') return false;
+      const start = new Date(r.date_start || r.date);
+      const end = new Date(r.date_end || r.date);
+      const checkDate = new Date(dateStr);
+      return checkDate >= start && checkDate <= end;
     });
   }
 
-  function onSlotClick(e){ 
-    const c=e.currentTarget; 
-    const resource_id=c.dataset.resource; 
-    const date=c.dataset.date; 
-    const win=c.dataset.window; 
-    const r=findReservation(resource_id,date,win); 
-    const form=el('#frmRequest'); 
-    form.resource_id.value=resource_id; 
-    form.date.value=date; 
-    form.window.value=win; 
-    if(r){ 
-      alert('⚠️ Créneau déjà réservé par '+fmt.who(r)); 
-    } else { 
-      window.scrollTo({top:0,behavior:'smooth'}); 
-      form.date.style.borderColor = 'var(--accent)';
-      form.window.style.borderColor = 'var(--accent)';
-      setTimeout(()=>{
-        form.date.style.borderColor = '';
-        form.window.style.borderColor = '';
-      },2000);
-    } 
+  // Calendrier mensuel
+  function renderCalendar(){
+    const wrap = el('#calendar');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    
+    const year = CURRENT_MONTH.getFullYear();
+    const month = CURRENT_MONTH.getMonth();
+    const daysInMonth = fmt.getDaysInMonth(year, month);
+    const firstDay = fmt.getFirstDayOfMonth(year, month);
+    
+    // Afficher le nom du mois
+    el('#currentMonth').textContent = CURRENT_MONTH.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+    
+    // Jours de la semaine
+    const weekdays = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+    weekdays.forEach(day => {
+      const d = document.createElement('div');
+      d.className = 'calendar-weekday';
+      d.textContent = day;
+      wrap.appendChild(d);
+    });
+    
+    // Cases vides avant le premier jour
+    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    for(let i = 0; i < startOffset; i++){
+      const empty = document.createElement('div');
+      empty.className = 'calendar-day other-month';
+      wrap.appendChild(empty);
+    }
+    
+    // Jours du mois
+    for(let day = 1; day <= daysInMonth; day++){
+      const date = new Date(year, month, day);
+      const dateStr = fmt.ymd(date);
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      const isBusy = isDateBusy(SELECTED_RESOURCE_ID, date);
+      
+      const dayEl = document.createElement('div');
+      dayEl.className = 'calendar-day';
+      dayEl.dataset.date = dateStr;
+      
+      // Déterminer la classe
+      if(isBusy){
+        dayEl.classList.add('busy');
+      } else {
+        dayEl.classList.add('free');
+      }
+      
+      // Vérifier si c'est dans la sélection
+      if(SELECTED_START_DATE && SELECTED_END_DATE){
+        const d = new Date(dateStr);
+        const start = new Date(SELECTED_START_DATE);
+        const end = new Date(SELECTED_END_DATE);
+        if(d >= start && d <= end){
+          dayEl.classList.add('selected');
+          if(dateStr === SELECTED_START_DATE) dayEl.classList.add('start-date');
+          if(dateStr === SELECTED_END_DATE) dayEl.classList.add('end-date');
+          if(dateStr !== SELECTED_START_DATE && dateStr !== SELECTED_END_DATE) dayEl.classList.add('in-range');
+        }
+      }
+      
+      dayEl.innerHTML = `
+        <div class="calendar-day-number">${day}</div>
+        ${isWeekend ? '<div class="calendar-day-info">WE</div>' : ''}
+        ${isBusy ? '<div class="calendar-day-info">Réservé</div>' : ''}
+      `;
+      
+      if(!isBusy){
+        dayEl.onclick = () => selectDate(dateStr);
+      }
+      
+      wrap.appendChild(dayEl);
+    }
+  }
+
+  // Sélection de date
+  function selectDate(date){
+    if(!SELECTED_START_DATE || (SELECTED_START_DATE && SELECTED_END_DATE)){
+      // Première sélection ou reset
+      SELECTED_START_DATE = date;
+      SELECTED_END_DATE = null;
+      el('#frmRequest input[name="date_start"]').value = date;
+      el('#frmRequest input[name="date_end"]').value = '';
+      el('#reservationSummary').classList.add('hidden');
+    } else {
+      // Deuxième sélection
+      const d1 = new Date(SELECTED_START_DATE);
+      const d2 = new Date(date);
+      if(d2 >= d1){
+        SELECTED_END_DATE = date;
+        el('#frmRequest input[name="date_end"]').value = date;
+        
+        // Vérifier qu'aucun jour entre les deux n'est occupé
+        let hasConflict = false;
+        let currentDate = new Date(SELECTED_START_DATE);
+        const endDate = new Date(SELECTED_END_DATE);
+        while(currentDate <= endDate){
+          if(isDateBusy(SELECTED_RESOURCE_ID, currentDate)){
+            hasConflict = true;
+            break;
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        if(hasConflict){
+          alert('⚠️ Certains jours dans cette période sont déjà réservés');
+          SELECTED_START_DATE = null;
+          SELECTED_END_DATE = null;
+          el('#frmRequest input[name="date_start"]').value = '';
+          el('#frmRequest input[name="date_end"]').value = '';
+        } else {
+          updateReservationSummary();
+        }
+      } else {
+        // Si date antérieure, on inverse
+        SELECTED_END_DATE = SELECTED_START_DATE;
+        SELECTED_START_DATE = date;
+        el('#frmRequest input[name="date_start"]').value = date;
+        el('#frmRequest input[name="date_end"]').value = SELECTED_END_DATE;
+        updateReservationSummary();
+      }
+    }
+    renderCalendar();
+  }
+
+  // Mise à jour du résumé
+  function updateReservationSummary(){
+    if(SELECTED_START_DATE && SELECTED_END_DATE){
+      const days = fmt.daysBetween(SELECTED_START_DATE, SELECTED_END_DATE);
+      const resource = ITEMS.find(x=>x.id===SELECTED_RESOURCE_ID);
+      el('#summaryText').innerHTML = `
+        <div>📦 <strong>${resource ? resource.name : 'Ressource'}</strong></div>
+        <div>📅 Du ${fmt.formatDate(SELECTED_START_DATE)} au ${fmt.formatDate(SELECTED_END_DATE)}</div>
+        <div>⏱️ Durée: ${days} jour(s)</div>
+      `;
+      el('#reservationSummary').classList.remove('hidden');
+    } else {
+      el('#reservationSummary').classList.add('hidden');
+    }
   }
 
   // Soumission réservation
   function submitRequest(e){ 
     e.preventDefault(); 
     const f=Object.fromEntries(new FormData(e.target)); 
+    
     if(!f.resource_id){
       alert('⚠️ Veuillez sélectionner une ressource.');
       return;
-    } 
-    const exists=findReservation(f.resource_id,f.date,f.window); 
-    if(exists){
-      alert('⚠️ Ce créneau est déjà réservé.');
+    }
+    
+    if(!f.date_start || !f.date_end){
+      alert('⚠️ Veuillez sélectionner une période complète.');
       return;
-    } 
+    }
+    
+    // Vérifier les conflits
+    let currentDate = new Date(f.date_start);
+    const endDate = new Date(f.date_end);
+    while(currentDate <= endDate){
+      if(isDateBusy(f.resource_id, currentDate)){
+        alert('⚠️ Certains jours sont déjà réservés dans cette période.');
+        return;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
     const id='RES-'+Math.random().toString(36).slice(2,10).toUpperCase(); 
-    const rec={id,status:'ACTIVE',created_ts:new Date().toISOString(),...f}; 
+    const rec={
+      id,
+      status:'ACTIVE',
+      created_ts:new Date().toISOString(),
+      ...f
+    }; 
+    
     RES.push(rec); 
     store.setRes(RES); 
-    renderCalendar(); 
-    renderNow(); 
     
     // Envoi au script Apps Script
-    if(CONFIG.endpoint && CONFIG.endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){ 
+    if(CONFIG.endpoint && CONFIG.endpoint !== APPS_SCRIPT_URL){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
-        mode:'no-cors', // Important pour Apps Script
+        mode:'no-cors',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           type:'reservation.create',
@@ -730,75 +924,98 @@
       }).catch((err)=>{
         console.log('Erreur sync:', err);
       }); 
-    } 
+    }
+    
+    // Reset
+    SELECTED_START_DATE = null;
+    SELECTED_END_DATE = null;
     e.target.reset(); 
+    el('#reservationSummary').classList.add('hidden');
+    renderCalendar(); 
+    renderMyReservations();
+    renderResourceGrid();
+    
     alert('✅ Réservation confirmée !');
   }
 
-  // Fonction pour afficher le statut de sync
-  function showSyncStatus(msg){
-    const status = el('#syncStatus');
-    if(status){
-      status.textContent = msg;
-      status.style.display = 'inline';
-      setTimeout(()=>{ status.style.display = 'none'; }, 3000);
-    }
-  }
-
-  // Occupants actuels
-  function renderNow(){ 
-    const tbl=el('#tblNow'); 
-    tbl.innerHTML='<tr><th>Ressource</th><th>Créneau</th><th>Occupant</th><th>Action</th></tr>'; 
-    const today=fmt.today(); 
-    const win=(new Date().getHours()<13?'AM':'PM'); 
+  // Afficher mes réservations
+  function renderMyReservations(){
+    const container = el('#myReservations');
+    if(!container) return;
     
-    ITEMS.forEach(it=>{ 
-      const r=findReservation(it.id,today,win); 
-      const tr=document.createElement('tr'); 
-      tr.innerHTML=`
-        <td class=title>${it.icon||'📦'} ${it.name}</td>
-        <td class=muted>${win==='AM'?'🌅 Matin':'☀️ Après‑midi'}</td>
-        <td>${r?'👤 '+fmt.who(r):'<span class=muted>✓ Libre</span>'}</td>
-        <td>${r?`<button class="btn" data-fb='${r.id}'>💬 Commenter</button>`:''}</td>
-      `; 
-      tbl.appendChild(tr); 
-    }); 
+    const myRes = RES.filter(r => r.resource_id === SELECTED_RESOURCE_ID && r.status === 'ACTIVE')
+                     .sort((a,b) => new Date(b.date_start || b.date) - new Date(a.date_start || a.date))
+                     .slice(0, 5);
+    
+    if(myRes.length === 0){
+      container.innerHTML = '<div class="muted">Aucune réservation active</div>';
+      return;
+    }
+    
+    container.innerHTML = myRes.map(r => {
+      const resource = ITEMS.find(x => x.id === r.resource_id);
+      const days = r.date_end ? fmt.daysBetween(r.date_start, r.date_end) : 1;
+      return `
+        <div style="padding:12px;background:var(--chip);border-radius:8px;margin-bottom:8px">
+          <div style="font-weight:600">${resource ? resource.name : r.resource_id}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">
+            👤 ${r.first_name} ${r.last_name} (${r.service})<br>
+            📅 ${fmt.formatDate(r.date_start || r.date)} ${r.date_end ? '→ ' + fmt.formatDate(r.date_end) : ''}<br>
+            ⏱️ ${days} jour(s)
+          </div>
+          <button class="btn" style="margin-top:8px" onclick="openFeedback('${r.id}')">💬 Commenter</button>
+        </div>
+      `;
+    }).join('');
   }
 
   // Feedback
-  function openFb(resId){ 
+  function openFeedback(resId){ 
     const r=RES.find(x=>x.id===resId); 
     if(!r) return; 
-    const it=ITEMS.find(x=>x.id===r.resource_id); 
-    el('#fbContext').textContent=`${it.name} – ${r.date} ${r.window==='AM'?'Matin':'Après‑midi'} (par ${fmt.who(r)})`; 
-    el('#frmFb input[name="reservation_id"]').value=r.id; 
-    dlgFb.showModal(); 
+    const it=ITEMS.find(x=>x.id===r.resource_id);
+    const days = r.date_end ? fmt.daysBetween(r.date_start, r.date_end) : 1;
+    el('#fbContext').innerHTML = `
+      <strong>${it ? it.name : 'Ressource'}</strong><br>
+      Réservation du ${fmt.formatDate(r.date_start || r.date)} 
+      ${r.date_end ? 'au ' + fmt.formatDate(r.date_end) : ''} 
+      (${days} jour(s))<br>
+      Par ${r.first_name} ${r.last_name} (${r.service})
+    `; 
+    el('#frmFb input[name="reservation_id"]').value=r.id;
+    const dialog = el('#dlgFb');
+    if(dialog) dialog.showModal(); 
   }
+  
+  window.openFeedback = openFeedback; // Rendre la fonction globale
   
   function submitFb(e){ 
     e.preventDefault(); 
     const f=Object.fromEntries(new FormData(e.target)); 
     const id='FB-'+Math.random().toString(36).slice(2,10).toUpperCase(); 
-    const it=RES.find(r=>r.id===f.reservation_id); 
-    const rating = f.rating.replace(/[^0-9]/g,'');
+    const it=RES.find(r=>r.id===f.reservation_id);
+    
     const rec={
       id,
       created_ts:new Date().toISOString(),
       resource_id:it.resource_id,
       reservation_id:f.reservation_id,
-      rating:+rating,
+      rating:+f.rating,
       comment:f.comment
     }; 
+    
     FB.unshift(rec); 
     store.setFb(FB); 
-    renderFb(); 
-    dlgFb.close(); 
+    renderFb();
+    
+    const dialog = el('#dlgFb');
+    if(dialog) dialog.close(); 
     
     // Envoi au script Apps Script
-    if(CONFIG.endpoint && CONFIG.endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){ 
+    if(CONFIG.endpoint && CONFIG.endpoint !== APPS_SCRIPT_URL){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
-        mode:'no-cors', // Important pour Apps Script
+        mode:'no-cors',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           type:'feedback.create',
@@ -811,6 +1028,7 @@
         console.log('Erreur sync feedback:', err);
       }); 
     } 
+    
     e.target.reset(); 
     alert('✅ Merci pour votre feedback !');
   }
@@ -818,12 +1036,12 @@
   function renderFb(){ 
     const tbl=el('#tblFb'); 
     tbl.innerHTML='<tr><th>Ressource</th><th>Note</th><th>Commentaire</th><th>Date</th></tr>'; 
-    FB.slice(0,20).forEach(f=>{ 
-      const it=ITEMS.find(x=>x.id===f.resource_id)||{name:'(supprimé)'}; 
+    FB.slice(0,10).forEach(f=>{ 
+      const it=ITEMS.find(x=>x.id===f.resource_id)||{name:'(supprimé)',icon:'📦'}; 
       const tr=document.createElement('tr'); 
       const stars = '⭐'.repeat(f.rating);
       tr.innerHTML=`
-        <td class=title>${it.icon||'📦'} ${it.name}</td>
+        <td>${it.icon||'📦'} ${it.name}</td>
         <td>${stars}</td>
         <td>${f.comment}</td>
         <td class=muted>${new Date(f.created_ts).toLocaleString('fr-FR')}</td>
@@ -835,9 +1053,9 @@
   // Export CSV
   function exportCSV(){ 
     const rows=[
-      ["id","resource_id","date","window","first_name","last_name","service","status","created_ts"]
+      ["id","resource_id","date_start","date_end","first_name","last_name","service","status","created_ts"]
     ].concat(RES.map(r=>[
-      r.id,r.resource_id,r.date,r.window,r.first_name,r.last_name,r.service,r.status,r.created_ts
+      r.id,r.resource_id,r.date_start||r.date,r.date_end||r.date,r.first_name,r.last_name,r.service,r.status,r.created_ts
     ])); 
     const csv=rows.map(r=>r.map(x=>`"${(x||'').toString().replaceAll('"','""')}"`).join(',')).join('\n'); 
     const blob=new Blob([csv],{type:'text/csv'}); 
@@ -859,7 +1077,7 @@
   }
   
   function syncServer(){ 
-    if(!CONFIG.endpoint || CONFIG.endpoint === 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){
+    if(!CONFIG.endpoint || CONFIG.endpoint === APPS_SCRIPT_URL){
       alert('⚠️ Veuillez configurer l\'URL du script Apps Script dans Admin.');
       return;
     } 
@@ -888,30 +1106,64 @@
     }); 
   }
 
+  function showSyncStatus(msg){
+    const status = el('#syncStatus');
+    if(status){
+      status.textContent = msg;
+      status.style.display = 'inline';
+      setTimeout(()=>{ status.style.display = 'none'; }, 3000);
+    }
+  }
+
   // Listeners
   document.addEventListener('click',e=>{ 
     const b=e.target.closest('button'); 
-    if(!b) return; 
-    if(b.id==='prevWeek'){weekOffset--; renderCalendar();} 
-    if(b.id==='nextWeek'){weekOffset++; renderCalendar();} 
-    if(b.id==='btnExport') exportCSV(); 
-    if(b.id==='btnAdmin') el('#adminPanel').classList.toggle('hidden'); 
-    if(b.dataset.fb) openFb(b.dataset.fb); 
+    if(!b) return;
+    
+    if(b.id==='prevMonth'){
+      CURRENT_MONTH.setMonth(CURRENT_MONTH.getMonth() - 1);
+      renderCalendar();
+    }
+    if(b.id==='nextMonth'){
+      CURRENT_MONTH.setMonth(CURRENT_MONTH.getMonth() + 1);
+      renderCalendar();
+    }
+    if(b.id==='btnExport') exportCSV();
+    if(b.id==='btnAdmin'){
+      const panel = el('#adminPanel');
+      if(panel) panel.classList.toggle('hidden');
+    }
   });
   
-  el('#frmRequest').addEventListener('submit',submitRequest);
-  el('#q').addEventListener('input',()=>{renderResourceGrid();});
-  el('#typeFilter').addEventListener('change',()=>{renderResourceGrid();});
-  el('#btnSaveAdmin').addEventListener('click',saveAdmin);
-  el('#btnSync').addEventListener('click',syncServer);
-  el('#fbClose').addEventListener('click',()=>dlgFb.close());
-  el('#frmFb').addEventListener('submit',submitFb);
+  el('#frmRequest')?.addEventListener('submit',submitRequest);
+  el('#q')?.addEventListener('input',()=>{renderResourceGrid();});
+  el('#typeFilter')?.addEventListener('change',()=>{renderResourceGrid();});
+  el('#btnSaveAdmin')?.addEventListener('click',saveAdmin);
+  el('#btnSync')?.addEventListener('click',syncServer);
+  el('#fbClose')?.addEventListener('click',()=>{
+    const dialog = el('#dlgFb');
+    if(dialog) dialog.close();
+  });
+  el('#frmFb')?.addEventListener('submit',submitFb);
+  
+  // Sync dates manuelles avec calendrier
+  el('#frmRequest input[name="date_start"]')?.addEventListener('change',(e)=>{
+    SELECTED_START_DATE = e.target.value;
+    renderCalendar();
+    updateReservationSummary();
+  });
+  
+  el('#frmRequest input[name="date_end"]')?.addEventListener('change',(e)=>{
+    SELECTED_END_DATE = e.target.value;
+    renderCalendar();
+    updateReservationSummary();
+  });
 
   // Boot
   (function init(){
     renderResourceGrid(); 
-    renderCalendar(); 
-    renderNow(); 
+    renderCalendar();
+    renderMyReservations();
     renderFb();
     
     // Configuration initiale
@@ -921,11 +1173,11 @@
     const adminKeyInput = el('#adminKey');
     const sheetsLink = el('#sheetsLink');
     
-    if(endpoint && endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){
+    if(endpoint && endpoint !== APPS_SCRIPT_URL){
       endpointView.textContent = 'Configuré ✓';
       endpointView.style.color = 'var(--ok)';
     } else {
-      endpointView.textContent = 'Non configuré - Voir instructions ci-dessous';
+      endpointView.textContent = 'Non configuré - Configurer ci-dessus';
       endpointView.style.color = 'var(--warn)';
     }
     
@@ -945,4 +1197,3 @@
   </script>
 </body>
 </html>
-
