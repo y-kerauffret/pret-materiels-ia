@@ -524,11 +524,11 @@
         <input type="hidden" name="resource_id" />
         <div>
           <label style="display:block;margin-bottom:8px;color:var(--muted)">📅 Date de début</label>
-          <input type="date" name="date_start" required />
+          <input type="date" name="date_start" id="date_start" required />
         </div>
         <div>
           <label style="display:block;margin-bottom:8px;color:var(--muted)">📅 Date de fin</label>
-          <input type="date" name="date_end" required />
+          <input type="date" name="date_end" id="date_end" required />
         </div>
         <div id="reservationSummary" class="hidden" style="padding:12px;background:var(--chip);border-radius:8px;border:1px solid var(--chip-border)">
           <div style="font-weight:600;margin-bottom:4px">📌 Récapitulatif</div>
@@ -811,8 +811,10 @@
       // Première sélection ou reset
       SELECTED_START_DATE = date;
       SELECTED_END_DATE = null;
-      el('#frmRequest input[name="date_start"]').value = date;
-      el('#frmRequest input[name="date_end"]').value = '';
+      const startInput = el('#date_start');
+      const endInput = el('#date_end');
+      if(startInput) startInput.value = date;
+      if(endInput) endInput.value = '';
       el('#reservationSummary').classList.add('hidden');
     } else {
       // Deuxième sélection
@@ -820,7 +822,8 @@
       const d2 = new Date(date);
       if(d2 >= d1){
         SELECTED_END_DATE = date;
-        el('#frmRequest input[name="date_end"]').value = date;
+        const endInput = el('#date_end');
+        if(endInput) endInput.value = date;
         
         // Vérifier qu'aucun jour entre les deux n'est occupé
         let hasConflict = false;
@@ -838,8 +841,10 @@
           alert('⚠️ Certains jours dans cette période sont déjà réservés');
           SELECTED_START_DATE = null;
           SELECTED_END_DATE = null;
-          el('#frmRequest input[name="date_start"]').value = '';
-          el('#frmRequest input[name="date_end"]').value = '';
+          const startInput = el('#date_start');
+          const endInput = el('#date_end');
+          if(startInput) startInput.value = '';
+          if(endInput) endInput.value = '';
         } else {
           updateReservationSummary();
         }
@@ -847,8 +852,10 @@
         // Si date antérieure, on inverse
         SELECTED_END_DATE = SELECTED_START_DATE;
         SELECTED_START_DATE = date;
-        el('#frmRequest input[name="date_start"]').value = date;
-        el('#frmRequest input[name="date_end"]').value = SELECTED_END_DATE;
+        const startInput = el('#date_start');
+        const endInput = el('#date_end');
+        if(startInput) startInput.value = date;
+        if(endInput) endInput.value = SELECTED_END_DATE;
         updateReservationSummary();
       }
     }
@@ -874,7 +881,11 @@
   // Soumission réservation
   function submitRequest(e){ 
     e.preventDefault(); 
-    const f=Object.fromEntries(new FormData(e.target)); 
+    const formData = new FormData(e.target);
+    const f = Object.fromEntries(formData); 
+    
+    // Debug pour voir les données
+    console.log('Données du formulaire:', f);
     
     if(!f.resource_id){
       alert('⚠️ Veuillez sélectionner une ressource.');
@@ -899,17 +910,24 @@
     
     const id='RES-'+Math.random().toString(36).slice(2,10).toUpperCase(); 
     const rec={
-      id,
-      status:'ACTIVE',
-      created_ts:new Date().toISOString(),
-      ...f
+      id: id,
+      status: 'ACTIVE',
+      created_ts: new Date().toISOString(),
+      resource_id: f.resource_id,
+      date_start: f.date_start,  // S'assurer que ces champs existent
+      date_end: f.date_end,      // S'assurer que ces champs existent
+      first_name: f.first_name,
+      last_name: f.last_name,
+      service: f.service
     }; 
+    
+    console.log('Données à envoyer:', rec);
     
     RES.push(rec); 
     store.setRes(RES); 
     
     // Envoi au script Apps Script
-    if(CONFIG.endpoint && CONFIG.endpoint !== APPS_SCRIPT_URL){ 
+    if(CONFIG.endpoint && CONFIG.endpoint !== 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
         mode:'no-cors',
@@ -952,25 +970,37 @@
       return;
     }
     
-    container.innerHTML = myRes.map(r => {
+    container.innerHTML = '';
+    
+    myRes.forEach(r => {
       const resource = ITEMS.find(x => x.id === r.resource_id);
-      const days = r.date_end ? fmt.daysBetween(r.date_start, r.date_end) : 1;
-      return `
-        <div style="padding:12px;background:var(--chip);border-radius:8px;margin-bottom:8px">
-          <div style="font-weight:600">${resource ? resource.name : r.resource_id}</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:4px">
-            👤 ${r.first_name} ${r.last_name} (${r.service})<br>
-            📅 ${fmt.formatDate(r.date_start || r.date)} ${r.date_end ? '→ ' + fmt.formatDate(r.date_end) : ''}<br>
-            ⏱️ ${days} jour(s)
-          </div>
-          <button class="btn" style="margin-top:8px" onclick="openFeedback('${r.id}')">💬 Commenter</button>
+      const days = r.date_end && r.date_start ? fmt.daysBetween(r.date_start, r.date_end) : 1;
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:12px;background:var(--chip);border-radius:8px;margin-bottom:8px';
+      
+      div.innerHTML = `
+        <div style="font-weight:600">${resource ? resource.name : r.resource_id}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">
+          👤 ${r.first_name} ${r.last_name} (${r.service})<br>
+          📅 ${fmt.formatDate(r.date_start || r.date)} ${r.date_end ? '→ ' + fmt.formatDate(r.date_end) : ''}<br>
+          ⏱️ ${days} jour(s)
         </div>
       `;
-    }).join('');
+      
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.marginTop = '8px';
+      btn.textContent = '💬 Commenter';
+      btn.onclick = () => openFeedback(r.id);
+      
+      div.appendChild(btn);
+      container.appendChild(div);
+    });
   }
 
   // Feedback
-  function openFeedback(resId){ 
+  function openFeedback(resId){
+    console.log('Opening feedback for:', resId); 
     const r=RES.find(x=>x.id===resId); 
     if(!r) return; 
     const it=ITEMS.find(x=>x.id===r.resource_id);
@@ -1012,7 +1042,7 @@
     if(dialog) dialog.close(); 
     
     // Envoi au script Apps Script
-    if(CONFIG.endpoint && CONFIG.endpoint !== APPS_SCRIPT_URL){ 
+    if(CONFIG.endpoint && CONFIG.endpoint !== "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"){ 
       fetch(CONFIG.endpoint,{
         method:'POST',
         mode:'no-cors',
@@ -1147,17 +1177,24 @@
   el('#frmFb')?.addEventListener('submit',submitFb);
   
   // Sync dates manuelles avec calendrier
-  el('#frmRequest input[name="date_start"]')?.addEventListener('change',(e)=>{
-    SELECTED_START_DATE = e.target.value;
-    renderCalendar();
-    updateReservationSummary();
-  });
+  const startInput = el('#date_start');
+  const endInput = el('#date_end');
   
-  el('#frmRequest input[name="date_end"]')?.addEventListener('change',(e)=>{
-    SELECTED_END_DATE = e.target.value;
-    renderCalendar();
-    updateReservationSummary();
-  });
+  if(startInput){
+    startInput.addEventListener('change',(e)=>{
+      SELECTED_START_DATE = e.target.value;
+      renderCalendar();
+      updateReservationSummary();
+    });
+  }
+  
+  if(endInput){
+    endInput.addEventListener('change',(e)=>{
+      SELECTED_END_DATE = e.target.value;
+      renderCalendar();
+      updateReservationSummary();
+    });
+  }
 
   // Boot
   (function init(){
@@ -1197,4 +1234,3 @@
   </script>
 </body>
 </html>
-
